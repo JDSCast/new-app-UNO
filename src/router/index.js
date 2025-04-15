@@ -8,6 +8,16 @@ const router = createRouter({
       name: 'game-board',
       component: () => import('../views/GameBoard.vue'),
     },
+    {
+      path: '/joingame',
+      name: 'joingame',
+      component: () => import('../views/JoinGame.vue'),
+    },
+    {
+      path: '/home',
+      name: 'home',
+      component: () => import('../views/Home.vue'),
+    }
   ],
 })
 
