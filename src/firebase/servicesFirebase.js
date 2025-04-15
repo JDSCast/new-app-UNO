@@ -25,6 +25,8 @@ export const deleteDocumentFromSubcollection = async (
   try {
     const docRef = doc(db, mainCollection, mainDocId, subcollection, docId);
     await deleteDoc(docRef);
+    console.log("Documento eliminado correctamente");
+    return true;
   } catch (error) {
     console.error("Error deleting document:", error);
     throw error;

@@ -105,7 +105,7 @@
   
     onSnapshotDocument("partidas", code, (doc) => {
       if (doc?.estado === "iniciada") {
-        router.push(`/gameboard/${code}`);
+        router.push(`/game-board/${code}`);
       }
     });
   };

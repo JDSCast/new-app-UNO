@@ -45,7 +45,7 @@ import {
   onSnapshotDocument,
   onSnapshotSubcollectionWithFullData, 
   readSubcollection,
-  deleteDocument
+  deleteDocumentFromSubcollection
 } from "../firebase/servicesFirebase.js";
 import { AuthService } from "../firebase/auth.js";
 
@@ -159,15 +159,27 @@ export default {
       try {
         const user = await AuthService.getCurrentUser();
         if(user && gameCode.value) {
+          Swal.fire({
+            title: 'Saliendo de la partida...',
+            allowOutsideClick: false,
+            didOpen: ()=> Swal.showLoading()
+          });
           await deleteDocumentFromSubcollection(
             "partidas",
             gameCode.value,
             "jugadores_partida",
             user.uid
           );
+
+          Swal.close();
         }
       } catch (error) {
         console.error("Error al abandonar la partida:", error);
+        Swal.fire(
+          "Error",
+          "No se pudo abandonar la partida correctamente",
+          "error"
+        );
       } finally {
         if (unsubscribeGame.value) unsubscribeGame.value();
         if (unsubscribePlayers.value) unsubscribePlayers.value();
