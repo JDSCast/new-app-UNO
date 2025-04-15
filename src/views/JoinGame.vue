@@ -26,14 +26,6 @@
           :players="players"
           @leave-game="handleLeaveGame"
         />
-
-        <BaseButton
-          label="Cancelar"
-          action="cancel"
-          variant="danger"
-          @click="handleCancel"
-          class="w-100 mt-2"
-        />
       </div>
     </div>
   </div>
@@ -51,7 +43,9 @@ import {
   readDocumentById, 
   createSubCollection, 
   onSnapshotDocument,
-  onSnapshotSubcollectionWithFullData 
+  onSnapshotSubcollectionWithFullData, 
+  readSubcollection,
+  deleteDocument
 } from "../firebase/servicesFirebase.js";
 import { AuthService } from "../firebase/auth.js";
 
@@ -100,6 +94,25 @@ export default {
           return;
         }
 
+        //Verificar si el usuario ya está en la partida
+        const jugadoresSnap = await readSubcollection(
+          "partidas",
+          codigoClean,
+          "jugadores_partida"
+        );
+
+        const usuarioYaExiste = jugadoresSnap.some(
+          jugador => jugador.idJugador === user.id
+        );
+
+        //Si ya el jugador se encuentra en la partida, simplemente se une al lobby
+        if(usuarioYaExiste) {
+          setupRealTimeListeners(codigoClean);
+          gameCode.value = codigoClean;
+          joinedGame.value = true;
+          return;
+        }
+
         await createSubCollection(
           "partidas",
           codigoClean,
@@ -143,11 +156,25 @@ export default {
     };
 
     const handleLeaveGame = async () => {
-      if (unsubscribeGame.value) unsubscribeGame.value();
-      if (unsubscribePlayers.value) unsubscribePlayers.value();
-      joinedGame.value = false;
-      gameCode.value = '';
-      players.value = [];
+      try {
+        const user = await AuthService.getCurrentUser();
+        if(user && gameCode.value) {
+          await deleteDocumentFromSubcollection(
+            "partidas",
+            gameCode.value,
+            "jugadores_partida",
+            user.uid
+          );
+        }
+      } catch (error) {
+        console.error("Error al abandonar la partida:", error);
+      } finally {
+        if (unsubscribeGame.value) unsubscribeGame.value();
+        if (unsubscribePlayers.value) unsubscribePlayers.value();
+        joinedGame.value = false;
+        gameCode.value = '';
+        players.value = [];
+      }
     };
 
     const triggerUnirseAPartida = () => {

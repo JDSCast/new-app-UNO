@@ -26,7 +26,7 @@
       <BaseButton
         label="Abandonar sala"
         variant="outline-danger"
-        @click="handleLeave"
+        @click="confirmLeave"
         class="w-100 mt-4"
       />
     </div>
@@ -35,6 +35,7 @@
   <script>
   import { defineComponent } from 'vue';
   import BaseButton from './BaseButton.vue';
+  import Swal from 'sweetalert2';
   
   export default defineComponent({
     name: 'GameLobby',
@@ -52,10 +53,25 @@
         default: () => []
       }
     },
-    emits: ['leave-game'],
+    emits: ['leave-game'], // Declaración explícita del evento emitido
+    
     methods: {
-      handleLeave() {
-        this.$emit('leave-game');
+      confirmLeave() {
+        // Método nuevo para confirmar antes de abandonar
+        Swal.fire({
+          title: '¿Abandonar sala?',
+          text: '¿Estás seguro que deseas salir del lobby?',
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonText: 'Sí, abandonar',
+          cancelButtonText: 'Cancelar',
+          confirmButtonColor: '#dc3545',
+          cancelButtonColor: '#6c757d'
+        }).then((result) => {
+          if (result.isConfirmed) {
+            this.$emit('leave-game'); // Emitir evento solo después de confirmar
+          }
+        });
       }
     }
   });
@@ -74,14 +90,25 @@
     margin-bottom: 1.5rem;
     border: 1px solid #eee;
     border-radius: 0.5rem;
+    padding: 0.5rem;
   }
   
   .list-group-item {
     padding: 0.75rem 1.25rem;
     border-bottom: 1px solid rgba(0,0,0,0.05);
+    transition: background-color 0.2s;
+  }
+  
+  .list-group-item:hover {
+    background-color: #f8f9fa;
   }
   
   .spinner-border {
     margin-right: 0.5rem;
+    vertical-align: middle;
+  }
+  
+  .badge {
+    font-weight: 500;
   }
   </style>

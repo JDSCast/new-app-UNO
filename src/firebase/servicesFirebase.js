@@ -16,6 +16,20 @@ import {
 } from "firebase/firestore";
 
 // Funciones CRUD para Firestore
+export const deleteDocumentFromSubcollection = async (
+  mainCollection,
+  mainDocId,
+  subcollection,
+  docId
+) => {
+  try {
+    const docRef = doc(db, mainCollection, mainDocId, subcollection, docId);
+    await deleteDoc(docRef);
+  } catch (error) {
+    console.error("Error deleting document:", error);
+    throw error;
+  }
+};
 
 export const emptyCollection = async (nombreColeccion) => {
   try {
