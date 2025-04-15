@@ -1,58 +1,85 @@
 // Importar Firebase y Firestore
-import { initializeApp } from 'firebase/app'
-import { getFirestore, collection, addDoc } from 'firebase/firestore'
+import { initializeApp } from 'firebase/app';
+import { getFirestore, collection, addDoc } from 'firebase/firestore';
 
 const firebaseConfig = {
-  // aca va las apis
-}
+  // Configuración de tu proyecto Firebase
+};
 
-const app = initializeApp(firebaseConfig)
-const db = getFirestore(app)
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
-const colores = ['rojo', 'azul', 'verde', 'amarillo']
+const colors = ['red', 'green', 'blue', 'yellow'];
+const actionCards = ['skip', 'reverse', 'draw_two'];
+const wildCards = ['wild', 'wild_draw_four'];
 
-const cartas = []
+const cards = [];
 
-// Cartas numéricas (del 0 al 9, con duplicados del 1 al 9)
-colores.forEach((color) => {
-  // Una carta con número 0
-  cartas.push({ color, tipo: 'numero', numero: 0 })
+// Cartas numéricas (1 cero por color, 2 de cada número del 1-9 por color)
+colors.forEach((color) => {
+  // Un solo cero por color
+  cards.push({
+    color: color,
+    type: 'number',
+    number: 0
+  });
 
-  // Dos cartas de cada número del 1 al 9
-  for (let i = 1; i <= 9; i++) {
-    cartas.push({ color, tipo: 'numero', numero: i })
-    cartas.push({ color, tipo: 'numero', numero: i })
+  // Dos de cada número del 1 al 9 por color
+  for (let num = 1; num <= 9; num++) {
+    cards.push({
+      color: color,
+      type: 'number',
+      number: num
+    });
+    cards.push({
+      color: color,
+      type: 'number',
+      number: num
+    });
   }
-})
+});
 
-// Cartas de acción (toma 2, reversa, salta) - 2 por color por tipo
-colores.forEach((color) => {
-  for (let i = 0; i < 2; i++) {
-    cartas.push({ color, tipo: 'toma2', numero: -1 })
-    cartas.push({ color, tipo: 'reversa', numero: -1 })
-    cartas.push({ color, tipo: 'salta', numero: -1 })
+// Cartas de acción (2 de cada tipo por color)
+colors.forEach((color) => {
+  actionCards.forEach((actionType) => {
+    cards.push({
+      color: color,
+      type: actionType,
+      number: null
+    });
+    cards.push({
+      color: color,
+      type: actionType,
+      number: null
+    });
+  });
+});
+
+// Cartas wild (4 de cada tipo)
+wildCards.forEach((wildType) => {
+  for (let i = 0; i < 4; i++) {
+    cards.push({
+      color: 'wild',
+      type: wildType,
+      number: null
+    });
   }
-})
+});
 
-// Comodines sin color
-for (let i = 0; i < 4; i++) {
-  cartas.push({ color: 'ninguno', tipo: 'comodin', numero: -1 })
-  cartas.push({ color: 'ninguno', tipo: 'comodin4', numero: -1 })
-}
-
-const subirCartas = async () => {
+const uploadCards = async () => {
   try {
-    const refCartas = collection(db, 'cartas')
+    const cardsRef = collection(db, 'cards');
 
-    for (const carta of cartas) {
-      console.log('Subiendo carta:', carta)
-      await addDoc(refCartas, carta)
+    for (const card of cards) {
+      console.log('Uploading card:', card);
+      await addDoc(cardsRef, card);
     }
 
-    console.log('¡Todas las cartas fueron subidas exitosamente!')
+    console.log('All cards uploaded successfully!');
+    console.log(`Total cards: ${cards.length}`);
   } catch (error) {
-    console.error('Error al subir cartas:', error)
+    console.error('Error uploading cards:', error);
   }
-}
+};
 
-subirCartas()
+uploadCards();
