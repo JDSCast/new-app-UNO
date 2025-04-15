@@ -12,7 +12,7 @@
   const props = defineProps({
     src: {
       type: String,
-      default: '/src/assets/logo.png', // Ruta por defecto del logo
+      default: '/src/assets/logo.avif', // Ruta por defecto del logo
     },
     alt: {
       type: String,

@@ -1,6 +1,7 @@
 <template>
   <div class="login-container d-flex justify-content-center align-items-center min-vh-100">
     <div class="card card-login w-100" style="max-width: 600px;">
+      <Logo alt="logo-uno" class="w-25 d-block mx-auto"/>
       <div class="login-card p-5 shadow-sm rounded-3 bg-white">
         <h1 class="text-center mb-4 fw-bold">Registro</h1>
         <form @submit.prevent="handleRegister">
@@ -33,6 +34,7 @@ import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { AuthService } from '../firebase/auth.js';
 import Swal from 'sweetalert2';
+import Logo from '@/components/Logo.vue';
 
 const name = ref('');
 const email = ref('');
