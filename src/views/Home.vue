@@ -50,7 +50,7 @@
       cancelButtonText: 'Cancelar'
     }).then((result) => {
       if (result.isConfirmed) {
-        router.push({ name: 'create-room' }); // Asegúrate de tener esta ruta configurada
+        router.push({ name: 'create-game' }); // Asegúrate de tener esta ruta configurada
       }
     });
   };

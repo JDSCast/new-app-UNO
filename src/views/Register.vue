@@ -22,7 +22,7 @@
           </div>
         </form>
         <p class="mt-3 text-center">
-          ¿Ya tienes cuenta? <router-link to="/login">Inicia sesión</router-link>
+          ¿Ya tienes cuenta? <router-link to="/login">Iniciar sesión</router-link>
         </p>
       </div>
     </div>

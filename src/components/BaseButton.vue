@@ -1,19 +1,21 @@
 <template>
-    <button
-      :type="type"
-      :class="['btn', `btn-${variant}`, sizeClass, customClass]"
-      :disabled="disabled || loading"
-      @click="$emit('click', action)" 
-    >
-      <span v-if="loading" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-      <slot>{{ label }}</slot>
-    </button>
-  </template>
-  
-  <script setup>
-  import { computed } from 'vue'
-  
-  const props = defineProps({
+  <button
+    :type="type"
+    :class="['btn', `btn-${variant}`, sizeClass, customClass]"
+    :disabled="disabled || loading"
+    @click="$emit('click', action)"
+  >
+    <span v-if="loading" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+    <slot>{{ label }}</slot>
+  </button>
+</template>
+
+<script>
+import { computed } from 'vue';
+
+export default {
+  name: 'BaseButton',
+  props: {
     label: String,
     type: {
       type: String,
@@ -41,12 +43,19 @@
     },
     action: {
       type: String,
-      required: true
+      required: false
     }
-  })
-  
-  const sizeClass = computed(() => {
-    return props.size ? `btn-${props.size}` : ''
-  })
-  </script>
+  },
+  emits: ['click'],
+  setup(props) {
+    const sizeClass = computed(() => {
+      return props.size ? `btn-${props.size}` : ''
+    });
+
+    return {
+      sizeClass
+    }
+  }
+}
+</script>
   
