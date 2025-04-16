@@ -4,35 +4,20 @@
     :class="{ vertical: isVertical, 'rotate-right': rotateDirection === 'right' }"
   >
     <div class="hand">
-      <div class="card-uno">
-        <div class="card-content">
-          <img
-            src="https://th.bing.com/th/id/OIP.yLDXXDvL-IQHoa3KOxSypAAAAA?rs=1&pid=ImgDetMain"
-            alt="card-back"
-          />
+      <template v-for="(_, index) in Math.min(cardCount, 4)" :key="index">
+        <div class="card-uno">
+          <div class="card-content">
+            <img
+              src="https://th.bing.com/th/id/OIP.yLDXXDvL-IQHoa3KOxSypAAAAA?rs=1&pid=ImgDetMain"
+              alt="card-back"
+            />
+          </div>
         </div>
-      </div>
-      <div class="card-uno">
+      </template>
+      <div v-if="cardCount > 0" class="card-uno bg-dark text-white">
         <div class="card-content">
-          <img
-            src="https://th.bing.com/th/id/OIP.yLDXXDvL-IQHoa3KOxSypAAAAA?rs=1&pid=ImgDetMain"
-            alt="card-back"
-          />
-        </div>
-      </div>
-      <div class="card-uno">
-        <div class="card-content">
-          <img
-            src="https://th.bing.com/th/id/OIP.yLDXXDvL-IQHoa3KOxSypAAAAA?rs=1&pid=ImgDetMain"
-            alt="card-back"
-          />
-        </div>
-      </div>
-      <div class="card-uno bg-dark text-white">
-        <div class="card-content">
-          <!-- + numero de cartas -->
           <div class="card-number">
-            <span class="number">+4</span>
+            <span class="number">+{{ cardCount - 4 > 0 ? cardCount - 4 : 0 }}</span>
           </div>
         </div>
       </div>
@@ -51,6 +36,10 @@ const props = defineProps({
   rotateDirection: {
     type: String,
     default: 'left', // 'left' o 'right'
+  },
+  cardCount: {
+    type: Number,
+    default: 0,
   },
 })
 

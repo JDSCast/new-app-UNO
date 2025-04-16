@@ -3,18 +3,20 @@ import { ref } from 'vue'
 import CardEffectModal from './CardEffectModal.vue'
 
 const props = defineProps({
+  type: {
+    type: String,
+    required: true,
+    validator: (value) => ['number', 'skip', 'reverse', 'draw_two', 'wild', 'wild_draw_four'].includes(value)
+  },
   number: {
-    type: [Number, String],
-    default: 2,
+    type: Number,
+    default: null
   },
   color: {
     type: String,
     default: 'red',
-  },
-  isSpecial: {
-    type: Boolean,
-    default: false,
-  },
+    validator: (value) => ['red', 'green', 'blue', 'yellow', 'wild'].includes(value)
+  }
 })
 
 const emit = defineEmits(['card-played'])
@@ -22,15 +24,15 @@ const emit = defineEmits(['card-played'])
 const showModal = ref(false)
 
 const handleCardClick = () => {
-  if (props.isSpecial) {
+  if (props.type === 'wild' || props.type === 'wild_draw_four') {
     showModal.value = true
   } else {
-    emit('card-played', { number: props.number, color: props.color })
+    emit('card-played', { type: props.type, number: props.number, color: props.color })
   }
 }
 
 const handleColorSelect = (selectedColor) => {
-  emit('card-played', { number: props.number, color: selectedColor })
+  emit('card-played', { type: props.type, number: props.number, color: selectedColor })
 }
 
 const handleCloseModal = () => {
@@ -38,16 +40,23 @@ const handleCloseModal = () => {
 }
 
 const getCardIcon = () => {
-  switch (props.number) {
+  switch (props.type) {
     case 'reverse':
       return 'bi-arrow-left-right'
     case 'skip':
       return 'bi-slash-circle'
+    case 'draw_two':
+      return 'bi-plus'
     case 'wild':
+    case 'wild_draw_four':
       return 'bi-asterisk'
     default:
       return ''
   }
+}
+
+const isSpecialCard = () => {
+  return props.type !== 'number'
 }
 </script>
 
@@ -55,41 +64,41 @@ const getCardIcon = () => {
   <div class="card-uno" :class="color" @click="handleCardClick">
     <div class="card-content">
       <div class="card-corner top-left">
-        <span v-if="!isSpecial" class="number">{{ number }}</span>
+        <span v-if="type === 'number'" class="number">{{ number }}</span>
         <div v-else class="special-number">
           <i
-            v-if="number === 'reverse' || number === 'skip' || number === 'wild'"
+            v-if="type === 'reverse' || type === 'skip' || type === 'wild' || type === 'wild_draw_four'"
             :class="['bi', getCardIcon(), 'icon']"
           ></i>
-          <template v-else>
+          <template v-else-if="type === 'draw_two'">
             <i class="bi bi-plus icon"></i>
-            <span class="number">{{ number.substring(1) }}</span>
+            <span class="number">2</span>
           </template>
         </div>
       </div>
       <div class="card-center">
-        <span v-if="!isSpecial" class="number center-content">{{ number }}</span>
+        <span v-if="type === 'number'" class="number center-content">{{ number }}</span>
         <div v-else class="special-number center-content">
           <i
-            v-if="number === 'reverse' || number === 'skip' || number === 'wild'"
+            v-if="type === 'reverse' || type === 'skip' || type === 'wild' || type === 'wild_draw_four'"
             :class="['bi', getCardIcon(), 'icon']"
           ></i>
-          <template v-else>
+          <template v-else-if="type === 'draw_two'">
             <i class="bi bi-plus icon"></i>
-            <span class="number">{{ number.substring(1) }}</span>
+            <span class="number">2</span>
           </template>
         </div>
       </div>
       <div class="card-corner bottom-right">
-        <span v-if="!isSpecial" class="number">{{ number }}</span>
+        <span v-if="type === 'number'" class="number">{{ number }}</span>
         <div v-else class="special-number">
           <i
-            v-if="number === 'reverse' || number === 'skip' || number === 'wild'"
+            v-if="type === 'reverse' || type === 'skip' || type === 'wild' || type === 'wild_draw_four'"
             :class="['bi', getCardIcon(), 'icon']"
           ></i>
-          <template v-else>
+          <template v-else-if="type === 'draw_two'">
             <i class="bi bi-plus icon"></i>
-            <span class="number">{{ number.substring(1) }}</span>
+            <span class="number">2</span>
           </template>
         </div>
       </div>
@@ -98,7 +107,7 @@ const getCardIcon = () => {
 
   <CardEffectModal
     :show="showModal"
-    :card-type="number"
+    :card-type="type"
     :color="color"
     @close="handleCloseModal"
     @select-color="handleColorSelect"

@@ -2,6 +2,14 @@
 import CardUNO from './CardUNO.vue'
 import { ref } from 'vue'
 
+const props = defineProps({
+  cards: {
+    type: Array,
+    required: true,
+    default: () => []
+  }
+})
+
 const emit = defineEmits(['card-played'])
 
 const handleCardPlayed = (cardData) => {
@@ -12,13 +20,15 @@ const handleCardPlayed = (cardData) => {
 <template>
   <div class="hand-container">
     <div class="hand">
-      <CardUNO number="1" color="red" @card-played="handleCardPlayed" />
-      <CardUNO number="+2" color="blue" :is-special="true" @card-played="handleCardPlayed" />
-      <CardUNO number="reverse" color="green" :is-special="true" @card-played="handleCardPlayed" />
-      <CardUNO number="skip" color="yellow" :is-special="true" @card-played="handleCardPlayed" />
-      <CardUNO number="wild" color="black" :is-special="true" @card-played="handleCardPlayed" />
-      <CardUNO number="+4" color="black" :is-special="true" @card-played="handleCardPlayed" />
-      <CardUNO number="5" color="red" @card-played="handleCardPlayed" />
+      <CardUNO
+        v-for="card in cards"
+        :key="card.card_instance_id"
+        :number="card.number"
+        :color="card.color"
+        :type="card.type"
+        :is-special="card.type !== 'number'"
+        @card-played="handleCardPlayed"
+      />
     </div>
   </div>
 </template>

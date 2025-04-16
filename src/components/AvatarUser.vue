@@ -12,22 +12,26 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  avatarUrl: {
+    type: String,
+    default: 'https://static-cse.canva.com/blob/1760022/1600w-vkBvE1d_xYA.jpg'
+  }
 })
 </script>
 
 <template>
-  <div class="avatar-container" :class="{ 'active-turn': isTurn }">
+  <div class="avatar-container" :class="{ 'active-turn': props.isTurn }">
     <div class="avatar-wrapper">
       <img
-        src="https://static-cse.canva.com/blob/1760022/1600w-vkBvE1d_xYA.jpg"
-        alt="avatar"
+        :src="props.avatarUrl"
+        :alt="props.name"
         class="avatar-img"
       />
-      <div class="turn-indicator" v-if="isTurn"></div>
+      <div class="turn-indicator" v-if="props.isTurn"></div>
     </div>
     <div class="user-info">
-      <h3 class="username">{{ name }}</h3>
-      <div class="score">Puntos: {{ score }}</div>
+      <h3 class="username">{{ props.name }}</h3>
+      <div class="score">Puntos: {{ props.score }}</div>
     </div>
   </div>
 </template>
