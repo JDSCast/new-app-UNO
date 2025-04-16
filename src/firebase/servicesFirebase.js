@@ -64,7 +64,7 @@ export const createDocument = async (nombreColeccion, dataDocument, idEspecifico
       docRef = doc(coleccionRef, idEspecifico);
       await setDoc(docRef, dataDocument);
     } else {
-      
+
       docRef = await addDoc(coleccionRef, dataDocument);
     }
     console.log("Documento creado con ID: ", docRef.id);
@@ -158,6 +158,30 @@ export const queryDocuments = async (nombreColeccion, campo, valor) => {
     return documentos;
   } catch (e) {
     console.error("Error al consultar los documentos: ", e);
+  }
+}
+
+export const querySubcollectionDocuments = async (nombreColeccion, idDocumentoPrincipal, nombreSubcoleccion, campo, valor) => {
+  try {
+    // Obtén una referencia a la subcolección
+    const subcoleccionRef = collection(db, nombreColeccion, idDocumentoPrincipal, nombreSubcoleccion);
+
+    // Filtra los documentos por el campo y valor especificados
+    const consulta = query(subcoleccionRef, where(campo, "==", valor));
+
+    // Obtén los documentos filtrados
+    const querySnapshot = await getDocs(consulta);
+
+    // Mapea los documentos a un array de objetos
+    const documentos = querySnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+
+    return documentos;
+  } catch (e) {
+    console.error("Error al consultar los documentos de la subcolección: ", e);
+    throw e;
   }
 }
 
@@ -265,7 +289,7 @@ export const createSubCollection = async (
       docSubRef = doc(subColeccionRef, idEspecifico);
       await setDoc(docSubRef, dataDocument);
     } else {
-      
+
       docSubRef = await addDoc(subColeccionRef, dataDocument);
     }
     console.log("Documento agregado a la subcolección con ID: ", docSubRef.id);
@@ -353,21 +377,23 @@ export const onSnapshotSubcollectionWithFullData = (
 
     // Escucha los cambios en tiempo real en la subcolección
     const unsubscribe = onSnapshot(subcoleccionRef, async (snapshot) => {
-      // Mapea la información de jugadores_partida
+      // Mapea la información de game_participants
       const datosSubcoleccion = snapshot.docs.map((doc) => ({
-        idJugadorPartida: doc.id, // ID del jugador
-        ...doc.data(), // Otros campos de jugadores_partida
+        game_participant_id: doc.id, // ID del jugador
+        ...doc.data(), // Otros campos de game_participants
       }));
 
-      // Consulta los nombres correspondientes desde la colección "jugadores"
+      // Consulta los nombres correspondientes desde la colección "players"
       for (const jugador of datosSubcoleccion) {
-        const jugadorDocRef = doc(db, "jugadores", jugador.idJugador);
+        const jugadorDocRef = doc(db, "players", jugador.player_id);
         const jugadorDoc = await getDoc(jugadorDocRef);
 
         if (jugadorDoc.exists()) {
-          jugador.nombre = jugadorDoc.data().nombre; // Añade el nombre al jugador
+          jugador.nickname = jugadorDoc.data().nickname; // Añade el nombre al jugador
+          jugador.avatar_url = jugadorDoc.data().avatar_url; // Añade la URL del avatar
         } else {
-          jugador.nombre = "Desconocido"; // Si no se encuentra, asigna un valor por defecto
+          jugador.nickname = "Desconocido"; // Si no se encuentra, asigna un valor por defecto
+          jugador.avatar_url = null; // Si no se encuentra, asigna null al avatar
         }
       }
 
@@ -481,5 +507,29 @@ export const deleteQuerySubcolletionBatch = async (nombreColeccion, idDocumento,
     }
   } catch (error) {
     console.error("Error al eliminar en la subcolección con WriteBatch:", error);
+  }
+};
+
+export const createSubcollectionBatch = async (nombreColeccion, idDocumento, subcoleccion, documentos) => {
+  try {
+    // Obtener referencia a la subcolección
+    const subcoleccionRef = collection(db, nombreColeccion, idDocumento, subcoleccion);
+
+    // Crear una instancia de WriteBatch
+    const batch = writeBatch(db);
+
+    // Agregar cada documento al batch para ser creado
+    documentos.forEach((docData) => {
+      const docRef = doc(subcoleccionRef); // Crear referencia a un nuevo documento
+      batch.set(docRef, docData);
+    });
+
+    // Confirmar todas las operaciones en el batch
+    await batch.commit();
+    console.log(`Se crearon ${documentos.length} documentos en la subcolección "${subcoleccion}"`);
+    return true;
+  } catch (error) {
+    console.error("Error al crear documentos en la subcolección con WriteBatch:", error);
+    throw error;
   }
 };

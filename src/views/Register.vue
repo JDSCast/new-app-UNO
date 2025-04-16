@@ -42,82 +42,52 @@ const password = ref('');
 const router = useRouter();
 
 const handleRegister = async () => {
-  // Verifica que todos los campos estén completos
   if (!name.value || !email.value || !password.value) {
     Swal.fire({
       icon: 'warning',
       title: 'Campos incompletos',
       text: 'Todos los campos son obligatorios.',
-      confirmButtonText: 'OK',
+      confirmButtonText: 'OK'
     });
     return;
   }
 
   try {
-    // Muestra el loading mientras se está registrando
-    const loading = Swal.fire({
+    // Mostrar loading mientras se valida
+    Swal.fire({
       title: 'Registrando...',
       text: 'Por favor espera',
       allowOutsideClick: false,
       didOpen: () => Swal.showLoading(),
     });
 
-    const response = await AuthService.register({ 
-      email: email.value, 
-      password: password.value, 
-      userData: { nombre: name.value } 
-    });
-
+    const response = await AuthService.register({ email: email.value, password: password.value, userData: { nickname: name.value } });
     console.log(response);
 
     if (response.success) {
-      // Si el registro es exitoso
+      // Mostrar alerta de éxito y redirigir al login después del OK
       await Swal.fire({
         icon: "success",
         title: "Registrado",
         text: "Usuario registrado correctamente.",
         confirmButtonText: "OK",
       });
+      Swal.close();
       router.push("/login");
     } else {
-      // Si hubo un error en el registro
+      Swal.close();
       Swal.fire({
         icon: 'error',
         title: 'Error al registrar el usuario',
         text: response.error || "Error al registrar. Inténtalo de nuevo.",
-        confirmButtonText: 'OK',
+        confirmButtonText: 'OK'
       });
+      return;
     }
 
   } catch (error) {
-    // Si ocurre algún error inesperado
-    handleAuthError(error.code);
-  } finally {
-    // Cierra el loading si terminó el proceso
     Swal.close();
+    AuthService.handleAuthError(error.code);
   }
-};
-
-// Maneja errores de autenticación
-const handleAuthError = (errorCode) => {
-  let message = '';
-  
-  switch (errorCode) {
-    case 'auth/email-already-in-use':
-      message = 'El correo electrónico ya está en uso.';
-      break;
-    case 'auth/weak-password':
-      message = 'La contraseña es demasiado débil.';
-      break;
-    default:
-      message = 'Hubo un error al registrar. Inténtalo de nuevo.';
-  }
-
-  Swal.fire({
-    icon: 'error',
-    title: 'Error',
-    text: message,
-    confirmButtonText: 'OK',
-  });
 };
 </script>

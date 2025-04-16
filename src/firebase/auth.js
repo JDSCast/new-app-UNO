@@ -1,9 +1,9 @@
 import { auth, db } from './config' //llamamos la autentificacion y la base de datos
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, browserLocalPersistence,setPersistence, updateProfile  } from 'firebase/auth'//trae las funciones propias de firebase
-import { doc, setDoc, getDoc, collection, query, where, getDocs } from 'firebase/firestore'
+import { doc,addDoc, setDoc, getDoc, collection, query, where, getDocs } from 'firebase/firestore'
 
 export const AuthService = {
-  // Función auxiliar para capitalizar el nombre 
+  // Función auxiliar para capitalizar el nombre
   //capitalizar poner la primera letra en mayuscula y el resto en minuscula
   capitalizeUsername(username) {
     if (!username || username.trim().length === 0) {
@@ -19,8 +19,8 @@ export const AuthService = {
   // Verificar si el nombre de usuario ya existe
   async isUsernameTaken(username) {
     try {
-      const usersRef = collection(db, 'jugadores')
-      const q = query(usersRef, where('nombre', '==', this.capitalizeUsername(username)))
+      const usersRef = collection(db, 'players')
+      const q = query(usersRef, where('nickname', '==', this.capitalizeUsername(username)))
       const querySnapshot = await getDocs(q)
       return !querySnapshot.empty
     } catch (error) {
@@ -33,10 +33,10 @@ export const AuthService = {
   async register({ email, password, userData }) {
     try {
       // Capitalizamos el nombre antes de verificar
-      const capitalizedName = this.capitalizeUsername(userData.nombre)
-      
+      const capitalizedName = this.capitalizeUsername(userData.nickname)
+
       // Verificamos si el nombre ya existe
-      const isNameTaken = await this.isUsernameTaken(userData.nombre)
+      const isNameTaken = await this.isUsernameTaken(userData.nickname)
       if (isNameTaken) {
         return {
           success: false,
@@ -49,12 +49,11 @@ export const AuthService = {
       //Agregar el nombre al perfil del usuario
       await updateProfile(userCredential.user, {
         displayName: capitalizedName
-      })  
+      })
       // Guardamos el perfil del usuario en una coleccion de Firestore
-      await this.createUserProfile(userCredential.user.uid, { 
+      await this.createUserProfile( {
         ...userData,
-        nombre: capitalizedName,
-        email 
+        user_id: userCredential.user.uid,
       })
 
       return {
@@ -111,12 +110,25 @@ export const AuthService = {
   },
 
   // Crear perfil de usuario en Firestore
-  async createUserProfile(userId, userData) {
+  async createUserProfile(userData, userId = null) {
     try {
-      await setDoc(doc(db, 'jugadores', userId), {
+      const playerData = {
         ...userData,
-        // createdAt: new Date().toISOString()
-      })
+        avatar_url: `https://avatar.iran.liara.run/public/${Math.floor(Math.random() * 99) + 1}`,
+        created_at: new Date().toISOString()
+      }
+
+      let docRef;
+      if (userId) {
+        // Si se proporciona userId, usar setDoc con el id específico
+        docRef = doc(db, 'players', userId);
+        await setDoc(docRef, playerData);
+      } else {
+        // Si no hay userId, usar addDoc para generar id automático
+        const playersRef = collection(db, 'players');
+        docRef = await addDoc(playersRef, playerData);
+      }
+
       return { success: true }
     } catch (error) {
       console.error('Error creating user profile:', error)
@@ -132,7 +144,7 @@ export const AuthService = {
   // Obtener perfil de usuario
   async getUserProfile(userId) {
     try {
-      const userDoc = await getDoc(doc(db, 'jugadores', userId))
+      const userDoc = await getDoc(doc(db, 'players', userId))
       return userDoc.exists() ? userDoc.data() : null
     } catch (error) {
       console.error('Error obteniendo el perfil del usuario:', error)

@@ -20,7 +20,7 @@ const router = createRouter({
       component: Register,
     },
     {
-      path: '/game-board',
+      path: '/game-board/:gameId',
       name: 'game-board',
       component: GameBoard,
     },
@@ -38,6 +38,11 @@ const router = createRouter({
       path: '/create-game',
       name: 'create-game',
       component: CreateGame,
+    },
+    //sino hay ruta, redirigir a login
+    {
+      path: '/:pathMatch(.*)*',
+      redirect: '/login',
     },
   ],
 })
